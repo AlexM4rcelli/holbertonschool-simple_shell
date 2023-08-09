@@ -19,4 +19,9 @@ typedef struct command_p
 	int (*func)(va_list args);
 } comm;
 
+extern char **environ;
+
+char **parser(char *str, char *separator);
+char *_getenv(char *str);
+int getcmd(void);
 # endif
