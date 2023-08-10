@@ -2,49 +2,29 @@
 
 int main (void)
 {
-    int i;
-    char **tokens = NULL;
-    char *buffer = NULL;
-    char *path = NULL;
+    char **tokens = NULL, *buffer = NULL;
+    int i = 0;
     
-    size_t buffsize = 0;
-    ssize_t prompt;
     while (1)
     {
-        if (isatty(0))
-            printf("#cisfun$ ");
-                    
-        prompt = getline(&buffer, &buffsize, stdin);
-        
-        if (prompt < 0)
-        {
-            free(buffer);
-            exit(0);
-        }
-        if (buffer[prompt - 1] == '\n')
-        {
-            buffer[prompt - 1] = '\0';
-            prompt--;
-        }
+        buffer = print_prompt();
+
         if ((strcmp(buffer, "exit")) == 0)
-        {
-            free(buffer);
-            exit(0);
-        }
-       
+            break;
+
         tokens = parser(buffer, " \t\n");
-        printf("%s - Typed: %ld - %s - Size: %ld\n", tokens[0], prompt, buffer, sizeof(buffer));
-        
-        path = _getenv("PATH=");
-        printf("%s\n", path);
-        i = 0;
-        while(tokens[i])
+
+        create_process(tokens);
+
+        if (tokens)
         {
-            free(tokens[i]);
-            i++;
+            for(i = 0; tokens[i]; i++)
+            {
+                free(tokens[i]);
+            }
+            free(tokens);
         }
-        free(path);
-        free(tokens);
+        free(buffer);
     }
 
     free(buffer);

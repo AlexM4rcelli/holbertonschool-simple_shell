@@ -1,17 +1,45 @@
 # include "main.h"
 
+char *print_prompt(void)
+{
+    ssize_t prompt;
+    char *buffer = NULL;
+    size_t buffsize = 0;
+
+    if (isatty(STDIN_FILENO) == 1)
+            printf("#cisfun$ ");
+            
+    prompt = getline(&buffer, &buffsize, stdin);
+        
+    if (prompt < 0 )
+    {
+        if (buffer)
+            free(buffer);
+        exit(-1);
+    }
+    if (buffer[prompt - 1] == '\n')
+    {
+        buffer[prompt - 1] = '\0';
+        prompt--;
+    }
+
+    return (buffer);
+}
+
 char **parser(char *str, char *separator)
 {
     char **tokens = NULL;
-    int i = 0, count = 0;
+    int i, count = 0, j;
     char *token;
     char *aux = strdup(str);
 
-    while (str[i])
+    for (i = 0; str[i]; i++)
     {
-        if (str[i] == ' ' || str[i] == '\n' || str[i] == '\t' || str[i + 1] == '\0')
-            count++;
-        i++;
+        for (j = 0; separator[j]; j++)
+        {
+            if (str[i] == separator[j] || str[i + 1] == '\0')
+                count++;
+        }
     }
 
     count += 1;
@@ -36,36 +64,98 @@ char **parser(char *str, char *separator)
 char *_getenv(char *str)
 {
     int i;
-    char **value = NULL;
+    char **parsed = NULL;
+    char *value = NULL;
 
     for (i = 0; environ[i]; i++)
     {
         if ((strncmp(str, environ[i], strlen(str))) == 0)
         {
-            
-            value = parser(environ[i], "=");
-            return (value[1]);
+            parsed = parser(environ[i], "=");
+            value = strdup(parsed[1]);
+            for (i = 0; parsed[i]; i++)
+                free(parsed[i]);
+            free(parsed);
+            return (value);
         }
     }
 
     return (NULL);
 }
 
-int getcmd(void)
+char *search_cmd(char *cmd)
 {
-    char *path = strdup(_getenv("PATH="));
-    char *aux = strdup(path);
-    char **directories;
+    char *full_path = _getenv("PATH=");
+    char *path = NULL;
+    char **directories = parser(full_path, ":");
     int i;
-    
-    directories = parser(aux, ":");
 
-    for(i = 0; directories[i]; i++)
-        printf("%s\n", directories[i]);
+    for (i = 0; directories[i]; i++)
+    {
+        path = (char *)calloc((strlen(directories[i]) + strlen(cmd) + 2), sizeof(char));
+        if (path)
+        {
+            strcat(path, directories[i]);
+            strcat(path, "/");
+            strcat(path, cmd);
     
-    for (i=0; directories[i]; i++)
-        free(directories[i]);
-    free(path);
-    free(aux);
-    return (0);
+            if (access(path, F_OK) == 0)
+            {
+                if (directories)
+                {
+                    for (i = 0; directories[i]; i++)
+                        free(directories[i]);
+                    free(directories);
+                }
+                free(full_path);
+                return (path);
+            }
+            
+            free(path);
+        }
+    }
+    if (directories)
+    {
+        for (i = 0; directories[i]; i++)
+            free(directories[i]);
+        free(directories);
+    }
+    free(full_path);
+    return (NULL);
+}
+
+pid_t create_process(char **buff)
+{
+    int status = 0;
+    char *full_path = NULL;
+    struct stat path_stat;
+    pid_t pid = fork();
+
+    if (pid == -1)
+        return (-1);
+    else if (pid == 0)
+    {
+        if (buff[0][0] == '/')
+        {
+            if (stat(buff[0], &path_stat) == 0)
+            {
+                if (path_stat.st_mode & S_IXUSR)
+                    execve(buff[0], buff, environ);
+                exit(1);
+            }
+        } else
+        {
+            if ((full_path = search_cmd(buff[0])))
+            {
+                execve(full_path, buff, environ);
+                free(full_path);
+                exit(1);
+            }
+        }
+    } else
+    {
+        waitpid(pid, &status, 0);
+        return (pid);
+    }
+    return (-1);
 }

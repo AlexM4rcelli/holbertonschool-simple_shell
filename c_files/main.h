@@ -2,6 +2,9 @@
 # define MAIN
 
 # include <stdio.h>
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <sys/wait.h>
 # include <unistd.h>
 # include <fcntl.h>
 # include <stdlib.h>
@@ -21,7 +24,9 @@ typedef struct command_p
 
 extern char **environ;
 
+char *print_prompt(void);
 char **parser(char *str, char *separator);
 char *_getenv(char *str);
-int getcmd(void);
+char *search_cmd(char *cmd);
+pid_t create_process(char **buff);
 # endif
