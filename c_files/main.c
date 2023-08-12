@@ -1,32 +1,39 @@
 # include "main.h"
 
-int main (void)
-{
-    char **tokens = NULL, *buffer = NULL;
-    int i = 0;
+int main(void) {
     
-    while (1)
-    {
-        buffer = print_prompt();
+	char **tokens = NULL, *buffer = NULL;
+	int i = 0;
 
-        if ((strcmp(buffer, "exit")) == 0)
+    while (1) {
+        buffer = print_prompt();
+        
+        if (buffer == NULL) {
             break;
+        }
+        
+        if (strcmp(buffer, "exit") == 0) {
+            free(buffer);
+            break;
+        }
 
         tokens = parser(buffer, " \t\n");
-
-        create_process(tokens);
-
-        if (tokens)
-        {
-            for(i = 0; tokens[i]; i++)
-            {
+        
+        if (tokens) {
+            pid_t child_pid = create_process(tokens);
+            
+            if (child_pid != -1) {
+                waitpid(child_pid, NULL, 0);
+            }
+            
+            for (i = 0; tokens[i]; i++) {
                 free(tokens[i]);
             }
             free(tokens);
         }
+        
         free(buffer);
     }
 
-    free(buffer);
-    return (0);
+    return 0;
 }

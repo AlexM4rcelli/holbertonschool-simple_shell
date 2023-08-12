@@ -11,11 +11,11 @@ char *print_prompt(void)
             
     prompt = getline(&buffer, &buffsize, stdin);
         
-    if (prompt < 0 )
+    if (prompt == -1)
     {
         if (buffer)
             free(buffer);
-        exit(-1);
+        return (NULL);
     }
     if (buffer[prompt - 1] == '\n')
     {
@@ -121,7 +121,7 @@ char *search_cmd(char *cmd)
         free(directories);
     }
     free(full_path);
-    return (NULL);
+	return (NULL);
 }
 
 pid_t create_process(char **buff)
@@ -132,8 +132,8 @@ pid_t create_process(char **buff)
     pid_t pid = fork();
 
     if (pid == -1)
-        return (-1);
-    else if (pid == 0)
+        return -1;
+	else if (pid == 0)
     {
         if (buff[0][0] == '/')
         {
@@ -143,19 +143,25 @@ pid_t create_process(char **buff)
                     execve(buff[0], buff, environ);
                 exit(1);
             }
-        } else
+		}
+		else
         {
             if ((full_path = search_cmd(buff[0])))
-            {
-                execve(full_path, buff, environ);
+			{
+				execve(full_path, buff, environ);
                 free(full_path);
-                exit(1);
-            }
-        }
-    } else
-    {
-        waitpid(pid, &status, 0);
-        return (pid);
-    }
-    return (-1);
+                exit(0);
+			}
+			else
+			{
+				printf("comand not found %s\n", buff[0]);
+				free(buff);
+				free(full_path);
+				exit(0);
+			}
+		}
+	} else {
+		waitpid(pid, &status, 0);
+	}
+	return pid;
 }

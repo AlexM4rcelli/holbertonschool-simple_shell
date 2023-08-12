@@ -10,6 +10,7 @@
 # include <stdlib.h>
 # include <string.h>
 # include <errno.h>
+# include <signal.h>
 /**
  * struct command_p - Struct of commands to print
  * @command: command to execute;
