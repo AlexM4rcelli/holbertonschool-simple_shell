@@ -1,0 +1,43 @@
+.TH CUSTOM_SHELL 1 "14th August 2023" "Custom Shell Manual"
+
+.SH NAME
+custom_shell \- A simple custom shell implementation
+
+.SH SYNOPSIS
+.B custom_shell
+
+.SH DESCRIPTION
+The custom_shell is a simple shell implementation that allows you to execute commands and manage processes.
+
+.SH INITIALIZATION
+Before using the custom_shell, you must compile it using the following command:
+
+.B
+gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o custom_shell
+
+.SH USAGE
+.B custom_shell
+
+.SH COMMANDS
+The custom_shell supports basic command execution and provides a few built-in commands:
+
+.IP "exit"
+Exit the shell.
+
+.IP "Other Commands"
+You can enter any valid command, and the shell will attempt to execute it.
+
+.SH OPTIONS
+There are no specific command-line options for the custom_shell.
+
+.SH EXIT STATUS
+The custom_shell returns the following exit statuses:
+
+.IP "0"
+Successful execution of a command.
+
+.IP "1"
+Error or failure during command execution.
+
+.SH SEE ALSO
+man(1), execve(2), fork(2), waitpid(2), stat(2)
