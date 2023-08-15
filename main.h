@@ -10,6 +10,9 @@
 # include <stdlib.h>
 # include <string.h>
 
+#define ERR_MALLOC "Unable to malloc space\n"
+#define ERR_FORK "Unable to fork and create child process\n"
+#define ERR_PATH "No such file or directory\n"
 
 extern char **environ;
 
@@ -18,5 +21,6 @@ char **parser(char *str, char *separator);
 char *_getenv(char *str);
 char *search_cmd(char *cmd);
 void create_process(char **buff, int count);
+void print_env(void);
 
 # endif

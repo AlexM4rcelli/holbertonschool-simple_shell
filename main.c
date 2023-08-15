@@ -21,14 +21,16 @@ int main(void) {
         if (feof(stdin) || strcmp(buffer, "exit") == 0)
             break;
 
-        if (strcmp(buffer, "") == 0) {
+        if (strcmp(buffer, "") == 0)
+        {
             free(buffer);
             continue;
         }
 
         tokens = parser(buffer, " \t\n");
 
-        if (tokens) {
+        if (tokens)
+        {
             create_process(tokens, count);
 
             for (i = 0; tokens[i]; i++)

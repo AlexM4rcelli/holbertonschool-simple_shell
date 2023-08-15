@@ -21,7 +21,7 @@ char *print_prompt(void)
     {
         if (buffer)
             free(buffer);
-        exit(0);
+        exit(EXIT_FAILURE);
     }
     if (buffer[prompt - 1] == '\n')
     {
@@ -60,13 +60,31 @@ char **parser(char *str, char *separator)
         tokens = malloc(count * sizeof(char *));
 
         if (!tokens)
-            return (NULL);
-        aux = strdup(str);
-        token = strtok(aux, separator);   
-        i = 0;
-        while (token)
         {
-            tokens[i++] = strdup(token);
+            perror("Unable to malloc space\n");
+            return (NULL);
+        }
+        aux = strdup(str);
+        if (!aux)
+        {
+            perror("Unable to malloc space\n");
+            free(tokens);
+            return (NULL);
+        }
+        token = strtok(aux, separator);   
+        
+        for (i = 0; token; i++)
+        {
+            tokens[i] = strdup(token);
+            if (!tokens[i])
+            {
+                perror("Unable to malloc space\n");
+                for (j = 0; j < i; j++)
+                    free(tokens[j]);
+                free(tokens);
+                free(aux);
+                return NULL;
+            }
             token = strtok(NULL, separator);
         }
         tokens[i] = NULL;
@@ -113,45 +131,45 @@ char *_getenv(char *str)
 
 char *search_cmd(char *cmd)
 {
-    char *full_path = NULL, *path = NULL;
-    char **directories = NULL; 
+    char *full_path = _getenv("PATH="), *path = NULL;
+    char **directories = parser(full_path, ":"); 
     int i;
-    
-    if (cmd)
+
+    if (!full_path || !directories)
     {
-        full_path = _getenv("PATH=");
-        directories = parser(full_path, ":");
-        for (i = 0; directories[i]; i++)
+        perror("Error parsing directories");
+        free(full_path);
+        return NULL;
+    }
+     
+    for (i = 0; directories[i]; i++)
+    {
+        path = (char *)calloc((strlen(directories[i]) + strlen(cmd) + 2), sizeof(char));
+        if (!path)
         {
-            path = (char *)calloc((strlen(directories[i]) + strlen(cmd) + 2), sizeof(char));
-            if (path)
-            {
-                strcat(path, directories[i]);
-                strcat(path, "/");
-                strcat(path, cmd);
-        
-                if (access(path, F_OK) == 0)
-                {
-                    if (directories)
-                    {
-                        for (i = 0; directories[i]; i++)
-                            free(directories[i]);
-                        free(directories);
-                    }
-                    free(full_path);
-                    return (path);
-                }            
-                free(path);
-            }
+            perror("Unable to malloc space\n");
+            for (i = 0; directories[i]; i++)
+                free(directories[i]);
+            free(directories);
+            free(full_path);
+            return (NULL);
         }
-        if (directories)
+        strcat(path, directories[i]); strcat(path, "/"); strcat(path, cmd);
+        if (access(path, F_OK) == 0)
         {
             for (i = 0; directories[i]; i++)
                 free(directories[i]);
             free(directories);
-        }
-        free(full_path);
+            free(full_path);
+            return (path);
+        }            
+        free(path);
     }
+    for (i = 0; directories[i]; i++)
+        free(directories[i]);
+    free(directories);
+    free(full_path);
+    
     return (NULL);
 }
 
@@ -172,7 +190,7 @@ void create_process(char **buff, int count)
     {
         if (stat(buff[0], &path_stat) != 0 || !(path_stat.st_mode & S_IXUSR))
         {
-            printf("%s: %d: not found\n", buff[0], count);
+            dprintf(STDERR_FILENO,"%s: %d: not found\n", buff[0], count);
             return;
         }
     }
@@ -181,7 +199,7 @@ void create_process(char **buff, int count)
         full_path = search_cmd(buff[0]);
         if (!full_path)
         {
-            printf("%s: %d: not found\n", buff[0], count);
+            dprintf(STDERR_FILENO, "%s: %d: not found\n", buff[0], count);
             return;
         }
     }
@@ -200,7 +218,7 @@ void create_process(char **buff, int count)
             execve(buff[0], buff, environ);
         perror("Error in execve");
         free(buff);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     else
     {
