@@ -1,5 +1,8 @@
 # include "main.h"
 
+int my_env(void);
+int my_exit(void);
+
 /**
  * main - Entry point of the shell.
  *
@@ -18,8 +21,17 @@ int main(void) {
         if (!buffer)
             break;
 
+        if (strcmp(buffer, "env") == 0)
+        {
+            my_env();
+            continue;
+        }
+
         if (feof(stdin) || strcmp(buffer, "exit") == 0)
+        {
+            my_exit();
             break;
+        }
 
         if (strcmp(buffer, "") == 0)
         {
@@ -41,4 +53,22 @@ int main(void) {
     }
     free(buffer);
     return (0);
+}
+
+int my_env(void)
+{
+    int i;
+
+    for (i = 0; environ[i]; i++)
+    {
+        write(STDOUT_FILENO, environ[i], strlen(environ[i]));
+        write(STDIN_FILENO, "\n", 1);
+    }
+
+    return (0);
+}
+
+int my_exit(void)
+{
+    return (-1);
 }

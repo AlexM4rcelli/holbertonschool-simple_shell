@@ -1,16 +1,28 @@
-# include "main.h"
+#include "main.h"
 
 /**
- * print_env - print the environment variable
+ * _getenv - Get the value of an environment variable.
+ * @str: The name of the environment variable.
+ *
+ * Return: The value of the environment variable.
  */
-void print_env(void)
-{
-    unsigned int i = 0;
 
-    while (environ[i])
+char *_getenv(char *str)
+{
+    int i;
+    char **parsed = NULL, *value = NULL;
+
+    for (i = 0; environ[i]; i++)
     {
-        write(STDOUT_FILENO, environ[i], strlen(environ[i]));
-        write(STDOUT_FILENO, "\n", 1);
-        i++;
+        if ((strncmp(str, environ[i], strlen(str))) == 0)
+        {
+            parsed = parser(environ[i], "=");
+            value = strdup(parsed[1]);
+            for (i = 0; parsed[i]; i++)
+                free(parsed[i]);
+            free(parsed);
+            return (value);
+        }
     }
+    return (NULL);
 }
