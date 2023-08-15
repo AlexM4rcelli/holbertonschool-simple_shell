@@ -8,20 +8,20 @@
 
 char *print_prompt(void)
 {
-	ssize_t prompt;
-	char *buffer = NULL;
-	size_t buffsize = 0;
+    ssize_t prompt;
+    char *buffer = NULL;
+    size_t buffsize = 0;
 
     if (isatty(STDIN_FILENO) == 1)
             write(STDOUT_FILENO,"$ ", 2);
-            
+
     prompt = getline(&buffer, &buffsize, stdin);
-        
+
     if (prompt == -1)
     {
         if (buffer)
             free(buffer);
-        exit(EXIT_FAILURE);
+        exit(0);
     }
     if (buffer[prompt - 1] == '\n')
     {
@@ -29,20 +29,7 @@ char *print_prompt(void)
         prompt--;
     }
 
-	prompt = getline(&buffer, &buffsize, stdin);
-
-	if (prompt == -1)
-	{
-		if (buffer)
-			free(buffer);
-		exit(EXIT_FAILURE);
-	}
-	if (buffer[prompt - 1] == '\n')
-	{
-		buffer[prompt - 1] = '\0';
-		prompt--;
-	}
-	return (buffer);
+    return (buffer);
 }
 
 /**
@@ -55,11 +42,19 @@ char *print_prompt(void)
 
 char **parser(char *str, char *separator)
 {
-	char **tokens = NULL, *token = NULL, *aux = NULL;
-	int i, count = 0, j;
+    char **tokens = NULL, *token = NULL, *aux = NULL;
+    int i, count = 0, j;
 
-	if (!str)
-		return (NULL);
+    if (str)
+    {
+        for (i = 0; str[i]; i++)
+        {
+            for (j = 0; separator[j]; j++)
+            {
+                if (str[i] == separator[j] || str[i + 1] == '\0')
+                    count++;
+            }
+        }
 
         count ++;
         tokens = malloc(count * sizeof(char *));
@@ -87,31 +82,9 @@ char **parser(char *str, char *separator)
         }
         tokens[i] = NULL;
 
-	aux = strdup(str);
-	if (!aux)
-		perror("Unable to malloc space\n");
-		free(tokens);
-		return (NULL);
-
-	token = strtok(aux, separator);
-	for (i = 0; token; i++)
-	{
-		tokens[i] = strdup(token);
-		{
-			if (!tokens[i])
-			perror("Unable to malloc space\n");
-		for (j = 0; j < i; j++)
-			free(tokens[j]);
-			free(tokens);
-			free(aux);
-		}
-		return (NULL);
-	}
-	token = strtok(NULL, separator);
-	tokens[i] = NULL;
-
-	free(aux);
-	return (tokens);
+        free(aux);
+    }
+    return (tokens);
 }
 
 /**
@@ -160,6 +133,7 @@ char *search_cmd(char *cmd)
         free(full_path);
     }
     return (NULL);
+}
 
 /**
  * create_process - Create and execute a new process for a given command.
@@ -169,10 +143,10 @@ char *search_cmd(char *cmd)
 
 void create_process(char **buff, int count)
 {
-	int status = 0;
-	char *full_path = NULL;
-	struct stat path_stat;
-	pid_t pid;
+    int status = 0;
+    char *full_path = NULL;
+    struct stat path_stat;
+    pid_t pid;
 
     if (buff[0][0] == '/')
     {

@@ -7,38 +7,52 @@
  * Return: the number as a string
  */
 
-
 char *_itoa(int num)
 {
-    unsigned int i = 0, len = 0, negative = 0, aux = num;
-	char *numStr;
+    unsigned int len = 0, negative = 0, aux = num;
+    char *numStr;
 
-	while (aux != 0)
+    if (num == 0)
 	{
-		aux = aux / 10;
-		len++;
-	}
+        numStr = malloc(2);
+        if (numStr)
+		{
+            numStr[0] = '0';
+            numStr[1] = '\0';
+        }
+        return numStr;
+    }
 
-	if (num < 0)
+    if (num < 0)
 	{
-		negative = 1;
-		num = -num;
-		numStr = malloc(len + 2);
-		len++;
-	} else
-		numStr = malloc(len + 1);
+        negative = 1;
+        num = -num;
+        len++;
+    }
 
-	while (num > 0)
+    aux = num;
+    while (aux != 0)
 	{
-		numStr[i++] = num % 10 + '0';
-		num = num / 10;
-	}
+        aux = aux / 10;
+        len++;
+    }
 
-	if (negative)
-		numStr[i++] = '-';
-	numStr[i] = '\0';
+    numStr = malloc(len + 1);
+    if (!numStr)
+		return NULL;
 
-	return (numStr);
+    numStr[len] = '\0';
+
+    while (num > 0)
+	{
+        numStr[--len] = (num % 10) + '0';
+        num = num / 10;
+    }
+
+    if (negative)
+        numStr[0] = '-';
+
+    return numStr;
 }
 
 /**
