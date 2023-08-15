@@ -21,33 +21,32 @@ int main(int argc, char *argv[]) {
         if (!buffer)
             break;
 
-        if (strcmp(buffer, "env") == 0)
-        {
-            my_env();
-            continue;
-        }
-
-        if (feof(stdin) || strcmp(buffer, "exit") == 0)
-        {
-            my_exit();
-            break;
-        }
-
-        if (strcmp(buffer, "") == 0)
+        if (strspn(buffer, " \t\n\r") == strlen(buffer))
         {
             free(buffer);
             continue;
         }
 
-        tokens = parser(buffer, " \t\n");
-
-        if (tokens)
+        if (strcmp(buffer, "env") == 0)
         {
-            create_process(argv[0], tokens, count);
-
-            for (i = 0; tokens[i]; i++)
-                free(tokens[i]);
-            free(tokens);
+            my_env();
+            continue;
+        }
+        else if (feof(stdin) || strcmp(buffer, "exit") == 0)
+        {
+            my_exit();
+            break;
+        }
+        else
+        {
+            tokens = parser(buffer, " \t\n\r");
+            if (tokens)
+            {
+                create_process(argv[0], tokens, count);
+                for (i = 0; tokens[i]; i++)
+                    free(tokens[i]);
+                free(tokens);
+            }
         }
         free(buffer);
     }
@@ -85,5 +84,5 @@ int my_env(void)
 
 int my_exit(void)
 {
-    return (-1);
+    return (0);
 }

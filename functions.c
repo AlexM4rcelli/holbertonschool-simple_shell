@@ -102,6 +102,13 @@ char *search_cmd(char *cmd)
 
     if (cmd && full_path && directories)
     {
+        if (access(cmd, F_OK | X_OK) == 0)
+        {
+            free(full_path);
+            free(directories);
+            return (strdup(cmd));
+        }
+
         for (i = 0; directories[i]; i++)
         {
             path = (char *)calloc((strlen(directories[i]) + strlen(cmd) + 2), sizeof(char));
@@ -148,43 +155,43 @@ void create_process(char *shell, char **buff, int count)
     struct stat path_stat;
     pid_t pid;
 
-    if (buff[0][0] == '/')
+    /* Check if the input is a valid path*/
+    if (stat(buff[0], &path_stat) == 0 && (path_stat.st_mode & S_IXUSR))
     {
-        if (stat(buff[0], &path_stat) != 0 || !(path_stat.st_mode & S_IXUSR))
+        /* Execute the valid path*/
+        pid = fork();
+        if (pid == -1)
+            perror("Can't fork");
+        else if (pid == 0)
         {
-            not_found(shell, buff[0], count);
-            return;
+            execve(buff[0], buff, environ);
+            perror("Error in execve");
+            free(buff);
+            exit(0);
         }
+        waitpid(pid, &status, 0);
     }
     else
     {
+        /* Search for the command in PATH*/
         full_path = search_cmd(buff[0]);
-        if (!full_path)
-        {
-            not_found(shell, buff[0], count);
-            return;
-        }
-    }
-
-    pid = fork();
-    if (pid == -1)
-        perror("Can't fork");
-    else if (pid == 0)
-    {
         if (full_path)
         {
-            execve(full_path, buff, environ);
+            pid = fork();
+            if (pid == -1)
+                perror("Can't fork");
+            else if (pid == 0)
+            {
+                execve(full_path, buff, environ);
+                perror("Error in execve");
+                free(buff);
+                free(full_path);
+                exit(0);
+            }
+            waitpid(pid, &status, 0);
             free(full_path);
-        } 
+        }
         else
-            execve(buff[0], buff, environ);
-        perror("Error in execve");
-        free(buff);
-        exit(0);
-    }
-    else
-    {
-        free(full_path);
-        waitpid(pid, &status, 0);
+            not_found(shell, buff[0], count);
     }
 }
