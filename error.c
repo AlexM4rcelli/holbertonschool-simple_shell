@@ -62,10 +62,12 @@ char *_itoa(int num)
 * @count: number of lines
 */
 
-void not_found(char *str, int count)
+void not_found(char *shell, char *str, int count)
 {
     char *num = _itoa(count);
     
+	write(STDERR_FILENO, shell, strlen(shell));
+    write(STDERR_FILENO, ": ", 2);
     write(STDERR_FILENO, str, strlen(str));
     write(STDERR_FILENO, ": ", 2);
     write(STDERR_FILENO, num, strlen(num));

@@ -20,9 +20,9 @@ char *print_prompt(void);
 char **parser(char *str, char *separator);
 char *_getenv(char *str);
 char *search_cmd(char *cmd);
-void create_process(char **buff, int count);
+void create_process(char *shell, char **buff, int count);
 void print_env(void);
-void not_found(char *str, int count);
+void not_found(char *shell, char *str, int count);
 char *_itoa(int num);
 
 

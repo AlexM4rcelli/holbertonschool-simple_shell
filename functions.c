@@ -141,7 +141,7 @@ char *search_cmd(char *cmd)
  * @count: The command count for error reporting.
  */
 
-void create_process(char **buff, int count)
+void create_process(char *shell, char **buff, int count)
 {
     int status = 0;
     char *full_path = NULL;
@@ -152,7 +152,7 @@ void create_process(char **buff, int count)
     {
         if (stat(buff[0], &path_stat) != 0 || !(path_stat.st_mode & S_IXUSR))
         {
-            not_found(buff[0], count);
+            not_found(shell, buff[0], count);
             return;
         }
     }
@@ -161,7 +161,7 @@ void create_process(char **buff, int count)
         full_path = search_cmd(buff[0]);
         if (!full_path)
         {
-            not_found(buff[0], count);
+            not_found(shell, buff[0], count);
             return;
         }
     }

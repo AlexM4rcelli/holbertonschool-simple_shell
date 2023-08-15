@@ -9,7 +9,7 @@ int my_exit(void);
  * Return: Always 0.
  */
 
-int main(void) {
+int main(int argc, char *argv[]) {
     char *buffer = NULL;
     char **tokens = NULL;
     int i, count = 0;
@@ -43,7 +43,7 @@ int main(void) {
 
         if (tokens)
         {
-            create_process(tokens, count);
+            create_process(argv[0], tokens, count);
 
             for (i = 0; tokens[i]; i++)
                 free(tokens[i]);
@@ -51,6 +51,8 @@ int main(void) {
         }
         free(buffer);
     }
+
+    (void)argc;
     free(buffer);
     return (0);
 }
