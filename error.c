@@ -1,5 +1,13 @@
 # include "main.h"
 
+/**
+ * _itoa - stringify a number
+ *
+ * @num: number to stringify
+ * Return: the number as a string
+ */
+
+
 char *_itoa(int num)
 {
     unsigned int i = 0, len = 0, negative = 0, aux = num;
@@ -32,6 +40,13 @@ char *_itoa(int num)
 
 	return (numStr);
 }
+
+/**
+* not_found - prints in stderr
+* 
+* @str: the command given
+* @count: number of lines
+*/
 
 void not_found(char *str, int count)
 {

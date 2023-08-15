@@ -55,6 +55,12 @@ int main(void) {
     return (0);
 }
 
+/**
+ * my_env - prints the environment variables
+ *
+ * Return: true
+ */
+
 int my_env(void)
 {
     int i;
@@ -67,6 +73,13 @@ int my_env(void)
 
     return (0);
 }
+
+
+/**
+ * my_exit - exit fo the current shell
+ *
+ * Return: false
+ */
 
 int my_exit(void)
 {
