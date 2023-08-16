@@ -69,12 +69,13 @@ int main(int argc, char *argv[])
 
 int my_env(void)
 {
-	int i;
+	char **env_ptr = environ;
 
-	for (i = 0; environ[i]; i++)
+	while (*env_ptr)
 	{
-		write(STDOUT_FILENO, environ[i], strlen(environ[i]));
-		write(STDIN_FILENO, "\n", 1);
+		write(STDOUT_FILENO, *env_ptr, strlen(*env_ptr));
+		write(STDOUT_FILENO, "\n", 1);
+		env_ptr++;
 	}
 
 	return (0);
@@ -89,5 +90,5 @@ int my_env(void)
 
 int my_exit(void)
 {
-	return (0);
+	return (-1);
 }
