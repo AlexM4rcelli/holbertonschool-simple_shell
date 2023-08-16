@@ -1,7 +1,7 @@
 # ifndef MAIN
 # define MAIN
 
-# include <stdio.h> 
+# include <stdio.h>
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <sys/wait.h>
@@ -21,9 +21,10 @@ char **parser(char *str, char *separator);
 char *_getenv(char *str);
 char *search_cmd(char *cmd);
 void create_process(char *shell, char **buff, int count);
+void execute_with_path(char **buff, char *full_path);
 void print_env(void);
 void not_found(char *shell, char *str, int count);
 char *_itoa(int num);
-
+void free_all(char **array, char *str);
 
 # endif
