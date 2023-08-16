@@ -155,10 +155,8 @@ void create_process(char *shell, char **buff, int count)
     struct stat path_stat;
     pid_t pid;
 
-    /* Check if the input is a valid path*/
     if (stat(buff[0], &path_stat) == 0 && (path_stat.st_mode & S_IXUSR))
     {
-        /* Execute the valid path*/
         pid = fork();
         if (pid == -1)
             perror("Can't fork");
@@ -173,7 +171,6 @@ void create_process(char *shell, char **buff, int count)
     }
     else
     {
-        /* Search for the command in PATH*/
         full_path = search_cmd(buff[0]);
         if (full_path)
         {
