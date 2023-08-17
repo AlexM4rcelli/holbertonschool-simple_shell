@@ -21,7 +21,7 @@ char *print_prompt(void)
 	{
 		if (buffer)
 			free(buffer);
-		exit(0);
+		exit(1);
 	}
 	if (buffer[prompt - 1] == '\n')
 	{
@@ -97,7 +97,7 @@ char *search_cmd(char *cmd)
 
 	if (cmd && full_path && directories)
 	{
-		if (access(cmd, F_OK | X_OK) == 0)
+		if (access(cmd, F_OK) == 0)
 		{
 			free_all(directories, full_path);
 			return (strdup(cmd));
@@ -153,7 +153,7 @@ void create_process(char *shell, char **buff, int count)
 			execve(buff[0], buff, environ);
 			perror("Error in execve");
 			free(buff);
-			exit(0);
+			exit(1);
 		}
 		waitpid(pid, &status, 0);
 	}
@@ -161,9 +161,17 @@ void create_process(char *shell, char **buff, int count)
 	{
 		full_path = search_cmd(buff[0]);
 		if (full_path)
-			execute_with_path(buff, full_path);
+		{
+			if (access(full_path, X_OK) != 0)
+			{
+				fprintf(stderr, "%s: %s: Permission denied\n", shell, full_path);
+				free(full_path);
+			}
+			else
+				execute_with_path(buff, full_path);
+		}
 		else
-			not_found(shell, buff[0], count);
+			fprintf(stderr, "%s: %s: %d: not found\n", shell, buff[0], count);
 	}
 }
 
@@ -184,7 +192,7 @@ void execute_with_path(char **buff, char *full_path)
 		execve(full_path, buff, environ);
 		perror("Error in execve");
 		free_all(buff, full_path);
-		exit(0);
+		exit(1);
 	}
 	waitpid(pid, &status, 0);
 	free(full_path);

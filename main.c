@@ -32,11 +32,7 @@ int main(int argc, char *argv[])
 		}
 
 		if (strcmp(buffer, "env") == 0)
-		{
 			my_env();
-			free(buffer);
-			continue;
-		}
 		else if (feof(stdin) || strcmp(buffer, "exit") == 0)
 		{
 			my_exit();
