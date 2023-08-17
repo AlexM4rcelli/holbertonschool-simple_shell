@@ -15,9 +15,9 @@ int main(int argc, char *argv[])
 {
 	char *buffer = NULL;
 	char **tokens = NULL;
-	int i, count = 0;
+	int i, count = 0, status = 0;
 
-	while (1)
+	while (status == 0)
 	{
 		count++;
 		buffer = print_prompt();
@@ -35,15 +35,14 @@ int main(int argc, char *argv[])
 			my_env();
 		else if (feof(stdin) || strcmp(buffer, "exit") == 0)
 		{
-			my_exit();
-			break;
+			status = my_exit();
 		}
 		else
 		{
 			tokens = parser(buffer, " \t\n\r");
 			if (tokens)
 			{
-				create_process(argv[0], tokens, count);
+				status = create_process(argv[0], tokens, count);
 				for (i = 0; tokens[i]; i++)
 					free(tokens[i]);
 				free(tokens);
@@ -53,7 +52,6 @@ int main(int argc, char *argv[])
 	}
 
 	(void)argc;
-	free(buffer);
 	return (0);
 }
 

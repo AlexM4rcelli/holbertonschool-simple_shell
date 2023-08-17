@@ -31,7 +31,6 @@ char *print_prompt(void)
 			free(buffer);
 		free(cwd);
 		free(user);
-		exit(1);
 	}
 	if (buffer[prompt - 1] == '\n')
 	{
@@ -148,7 +147,7 @@ char *search_cmd(char *cmd)
  * @shell: the name of the shell
  */
 
-void create_process(char *shell, char **buff, int count)
+int create_process(char *shell, char **buff, int count)
 {
 	int status = 0;
 	char *full_path = NULL;
@@ -159,13 +158,15 @@ void create_process(char *shell, char **buff, int count)
 	{
 		pid = fork();
 		if (pid == -1)
+		{
 			perror("Can't fork");
+			return (-1);
+		}
 		else if (pid == 0)
 		{
 			execve(buff[0], buff, environ);
 			perror("Error in execve");
 			free(buff);
-			exit(1);
 		}
 		waitpid(pid, &status, 0);
 	}
@@ -180,11 +181,12 @@ void create_process(char *shell, char **buff, int count)
 				free(full_path);
 			}
 			else
-				execute_with_path(buff, full_path);
+				status = execute_with_path(buff, full_path);
 		}
 		else
 			fprintf(stderr, "%s: %s: %d: not found\n", shell, buff[0], count);
 	}
+	return (status);
 }
 
 /**
@@ -192,20 +194,23 @@ void create_process(char *shell, char **buff, int count)
  * @buff: An array of strings containing the command and its arguments.
  * @full_path: The full path to the command.
  */
-void execute_with_path(char **buff, char *full_path)
+int execute_with_path(char **buff, char *full_path)
 {
 	int status = 0;
 	pid_t pid = fork();
 
 	if (pid == -1)
+	{
 		perror("Can't fork");
+		return (-1);
+	}
 	else if (pid == 0)
 	{
 		execve(full_path, buff, environ);
 		perror("Error in execve");
 		free_all(buff, full_path);
-		exit(1);
 	}
 	waitpid(pid, &status, 0);
 	free(full_path);
+	return (0);
 }
