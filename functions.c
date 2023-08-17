@@ -9,19 +9,11 @@
 char *print_prompt(void)
 {
 	ssize_t prompt;
-	char *buffer = NULL, *cwd = NULL, *user = getlogin();
-	char host[1024];
+	char *buffer = NULL;
 	size_t buffsize = 0;
 
-	if (gethostname(host, sizeof(host)) != 0)
-		return (NULL);
-
-	cwd = getcwd(NULL, 0);
-	if (cwd == NULL)
-		return (NULL);
-
 	if (isatty(STDIN_FILENO) == 1)
-		fprintf(stdout, "%s@%s:%s$ ", user, host, cwd);
+		fprintf(stdout, "$ ");
 
 	prompt = getline(&buffer, &buffsize, stdin);
 
@@ -29,8 +21,6 @@ char *print_prompt(void)
 	{
 		if (buffer)
 			free(buffer);
-		free(cwd);
-		free(user);
 	}
 	if (buffer[prompt - 1] == '\n')
 	{
@@ -38,8 +28,6 @@ char *print_prompt(void)
 		prompt--;
 	}
 
-	free(cwd);
-	free(user);
 	return (buffer);
 }
 
@@ -108,7 +96,7 @@ char *search_cmd(char *cmd)
 
 	if (cmd && full_path && directories)
 	{
-		if (access(cmd, F_OK) == 0)
+		if (access(cmd, F_OK | X_OK) == 0)
 		{
 			free_all(directories, full_path);
 			return (strdup(cmd));
@@ -174,15 +162,7 @@ int create_process(char *shell, char **buff, int count)
 	{
 		full_path = search_cmd(buff[0]);
 		if (full_path)
-		{
-			if (access(full_path, X_OK) != 0)
-			{
-				fprintf(stderr, "%s: %s: Permission denied\n", shell, full_path);
-				free(full_path);
-			}
-			else
 				status = execute_with_path(buff, full_path);
-		}
 		else
 			fprintf(stderr, "%s: %s: %d: not found\n", shell, buff[0], count);
 	}

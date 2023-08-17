@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 		if (!buffer)
 			break;
 
-		if (strspn(buffer, " \t\n\r") == strlen(buffer))
+		if (strspn(buffer, " \t\n") == strlen(buffer))
 		{
 			free(buffer);
 			continue;
