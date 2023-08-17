@@ -9,11 +9,19 @@
 char *print_prompt(void)
 {
 	ssize_t prompt;
-	char *buffer = NULL;
+	char *buffer = NULL, *cwd = NULL, *user = getlogin();
+	char host[1024];
 	size_t buffsize = 0;
 
+	if (gethostname(host, sizeof(host)) != 0)
+		return (NULL);
+
+	cwd = getcwd(NULL, 0);
+	if (cwd == NULL)
+		return (NULL);
+
 	if (isatty(STDIN_FILENO) == 1)
-		write(STDOUT_FILENO, "$ ", 2);
+		fprintf(stdout, "%s@%s:%s$ ", user, host, cwd);
 
 	prompt = getline(&buffer, &buffsize, stdin);
 
@@ -21,6 +29,8 @@ char *print_prompt(void)
 	{
 		if (buffer)
 			free(buffer);
+		free(cwd);
+		free(user);
 		exit(1);
 	}
 	if (buffer[prompt - 1] == '\n')
@@ -29,6 +39,8 @@ char *print_prompt(void)
 		prompt--;
 	}
 
+	free(cwd);
+	free(user);
 	return (buffer);
 }
 
