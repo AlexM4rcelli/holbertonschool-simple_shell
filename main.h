@@ -16,8 +16,8 @@ char *print_prompt(void);
 char **parser(char *str, char *separator);
 char *_getenv(char *str);
 char *search_cmd(char *cmd);
-int create_process(char *shell, char **buff, int count);
-int execute_with_path(char **buff, char *full_path);
+void create_process(char *shell, char **buff, int count);
+void execute_with_path(char **buff, char *full_path);
 void print_env(void);
 void free_all(char **array, char *str);
 
