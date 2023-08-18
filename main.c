@@ -17,57 +17,49 @@ int my_exit(void);
 
 int main(int argc, char *argv[])
 {
-    char *buffer = NULL;
-    char **tokens = NULL;
-    int i, count = 0;
+	char *buffer = NULL;
+	char **tokens = NULL;
+	int i, count = 0, status = 0;
 
 
-    while (1)
-    {
-        count++;
-        buffer = print_prompt();
+	while (status >= 0)
+	{
+		count++;
+		buffer = print_prompt(status);
 
 
-        if (!buffer)
-            break;
+		if (!buffer)
+			break;
 
+		if (strspn(buffer, " \t\n\r") == strlen(buffer))
+		{
+			free(buffer);
+			continue;
+		}
+		if (strcmp(buffer, "env") == 0)
+			status = my_env();
+		else if (feof(stdin) || strcmp(buffer, "exit") == 0)
+		{
+			free(buffer);
+			my_exit();
+			break;
+		}
+		else
+		{
+			tokens = parser(buffer, " \t\n\r");
+			if (tokens)
+			{
+				status = create_process(argv[0], tokens, count);
+				for (i = 0; tokens[i]; i++)
+					free(tokens[i]);
+				free(tokens);
+			}
+		}
+		free(buffer);
+	}
 
-        if (strspn(buffer, " \t\n\r") == strlen(buffer))
-        {
-            free(buffer);
-            continue;
-        }
-
-
-        if (strcmp(buffer, "env") == 0)
-        {
-            my_env();
-            free(buffer);
-            continue;
-        }
-        else if (feof(stdin) || strcmp(buffer, "exit") == 0)
-        {
-            my_exit();
-            break;
-        }
-        else
-        {
-            tokens = parser(buffer, " \t\n\r");
-            if (tokens)
-            {
-                create_process(argv[0], tokens, count);
-                for (i = 0; tokens[i]; i++)
-                    free(tokens[i]);
-                free(tokens);
-            }
-        }
-        free(buffer);
-    }
-
-
-    (void)argc;
-    free(buffer);
-    return (0);
+	(void)argc;
+	return (status);
 }
 
 /**
@@ -99,5 +91,5 @@ int my_env(void)
 
 int my_exit(void)
 {
-	return (-1);
+	return (2);
 }
