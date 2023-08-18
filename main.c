@@ -91,5 +91,5 @@ int my_env(void)
 
 int my_exit(void)
 {
-	return (2);
+	return (-1);
 }

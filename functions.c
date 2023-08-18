@@ -140,9 +140,6 @@ char *search_cmd(char *cmd)
 	return (NULL);
 }
 
-
-
-
 /**
  * create_process - Create and execute a new process for a given command.
  * @buff: An array of strings containing the command and its arguments.
@@ -160,36 +157,36 @@ int create_process(char *shell, char **buff, int count)
 
 	if (!path_env)
 	{
-		fprintf(stderr, "%s: %d: %s: command not found\n", shell, count, buff[0]);
+		fprintf(stderr, "%s: %d: %s: not found\n", shell, count, buff[0]);
 		return (127);
 	}
-	if (stat(buff[0], &path_stat) == 0 && (path_stat.st_mode & S_IXUSR))
+	full_path = search_cmd(buff[0]);
+    if (!full_path || strlen(full_path) == 0)
 	{
-		pid = fork();
-		if (pid == -1)
-			perror("Can't fork");
-		else if (pid == 0)
-		{
-			execve(buff[0], buff, environ);
-			perror("Error in execve");
-			free_all(buff, full_path);
-			exit(127);
-		}
-		waitpid(pid, &status, 0);
-	}
-	else
-	{
-		full_path = search_cmd(buff[0]);
-		if (full_path)
-			status = execute_with_path(buff, full_path);
-		else
-			{
-				fprintf(stderr, "%s: %s: %d: not found\n", shell, buff[0], count);
-				status = 127;
-			}
-	}
+        fprintf(stderr, "%s: %s: %d: not found\n", shell, buff[0], count);
+		free(path_env);
+        return (127);
+    }
+    if (stat(full_path, &path_stat) == 0 && (path_stat.st_mode & S_IXUSR))
+    {
+        pid = fork();
+        if (pid == -1)
+            perror("Can't fork");
+        else if (pid == 0)
+        {
+            execve(full_path, buff, environ);
+            perror("Error in execve");
+            free_all(buff, full_path);
+            exit(127);
+        }
+        waitpid(pid, &status, 0);
+    }
+    else
+        status = execute_with_path(buff, full_path);
+
+    free(full_path);
 	free(path_env);
-	return (status);
+    return (status);
 }
 
 /**
