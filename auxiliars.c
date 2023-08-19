@@ -6,7 +6,7 @@
  * @str: string to free
  */
 
-void free_all(char **array, char *str)
+void free_all(char **array)
 {
 	int i;
 
@@ -16,6 +16,4 @@ void free_all(char **array, char *str)
 			free(array[i]);
 		free(array);
 	}
-	if (str)
-		free(str);
 }

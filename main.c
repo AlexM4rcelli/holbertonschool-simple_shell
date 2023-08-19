@@ -4,7 +4,7 @@
 
 
 int my_env(void);
-int my_exit(void);
+int my_exit(int status);
 
 /**
  * main - Entry point of the shell.
@@ -17,7 +17,7 @@ int my_exit(void);
 
 int main(int argc, char *argv[])
 {
-	char *buffer = NULL;
+	char *buffer = NULL, *path = NULL;
 	char **tokens = NULL;
 	int i, count = 0, status = 0;
 
@@ -41,15 +41,15 @@ int main(int argc, char *argv[])
 		else if (feof(stdin) || strcmp(buffer, "exit") == 0)
 		{
 			free(buffer);
-			my_exit();
-			break;
+			my_exit(status);
 		}
 		else
 		{
 			tokens = parser(buffer, " \t\n\r");
 			if (tokens)
 			{
-				status = create_process(argv[0], tokens, count);
+				path = _getenv("PATH");
+				status = create_process(argv[0], tokens, count, path);
 				for (i = 0; tokens[i]; i++)
 					free(tokens[i]);
 				free(tokens);
@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
 	}
 
 	(void)argc;
+	free(path);
 	return (status);
 }
 
@@ -89,7 +90,7 @@ int my_env(void)
  * Return: false
  */
 
-int my_exit(void)
+int my_exit(int status)
 {
-	return (-1);
+	_Exit(status);
 }

@@ -80,7 +80,8 @@ char **parser(char *str, char *separator)
 		if (!tokens[i])
 		{
 			perror("Unable to malloc space\n");
-			free_all(tokens, aux);
+			free_all(tokens);
+			free(aux);
 			return (NULL);
 		}
 		token = strtok(NULL, separator);
@@ -96,14 +97,14 @@ char **parser(char *str, char *separator)
 /**
  * search_cmd - Search for a command in the directories specified by PATH.
  * @cmd: The command to search for.
+ * @full_path: the actual PATH variable.
  *
  * Return: The full path to the command if found, otherwise NULL.
  */
 
-
-char *search_cmd(char *cmd)
+char *search_cmd(char *cmd, char *full_path)
 {
-	char *full_path = _getenv("PATH="), *path = NULL;
+	char *path = NULL;
 	char **directories = NULL;
 	int i;
 
@@ -111,10 +112,7 @@ char *search_cmd(char *cmd)
 		return (NULL);
 	directories = parser(full_path, ":");
 	if (!directories)
-	{
-		free(full_path);
 		return (NULL);
-	}
 
 	for (i = 0; directories[i]; i++)
 	{
@@ -124,7 +122,7 @@ char *search_cmd(char *cmd)
 			strcat(path, directories[i]), strcat(path, "/"), strcat(path, cmd);
 			if (access(path, F_OK) == 0)
 			{
-				free_all(directories, full_path);
+				free_all(directories);
 				return (path);
 			}
 			free(path);
@@ -132,11 +130,11 @@ char *search_cmd(char *cmd)
 		else
 		{
 			perror("Unable to malloc space\n");
-			free_all(directories, full_path);
+			free_all(directories);
 			return (NULL);
 		}
 	}
-	free_all(directories, full_path);
+	free_all(directories);
 	return (NULL);
 }
 
@@ -148,19 +146,19 @@ char *search_cmd(char *cmd)
  * Return: status
  */
 
-int create_process(char *shell, char **buff, int count)
+int create_process(char *shell, char **buff, int count, char *path)
 {
-	char *full_path = NULL, *path_env = _getenv("PATH=");
+	char *full_path = NULL;
 	struct stat path_stat;
 	pid_t pid;
 	int status = 0;
 
-	if (!path_env || strlen(path_env) == 0)
+	if (!path || strlen(path) == 0)
 	{
-		fprintf(stderr, "%s: %d: %s: command not found\n", shell, count, buff[0]);
+		fprintf(stderr, "%s: %d: %s: not found\n", shell, count, buff[0]);
 		return (127);
 	}
-	if (stat(buff[0], &path_stat) == 0 && (path_stat.st_mode & S_IXUSR))
+	if (access(buff[0], F_OK) == 0 && (path_stat.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)))
 	{
 		pid = fork();
 		if (pid == -1)
@@ -169,14 +167,15 @@ int create_process(char *shell, char **buff, int count)
 		{
 			execve(buff[0], buff, environ);
 			perror("Error in execve");
-			free_all(buff, full_path);
+			free_all(buff);
+			free(full_path);
 			exit(127);
 		}
 		waitpid(pid, &status, 0);
 	}
 	else
 	{
-		full_path = search_cmd(buff[0]);
+		full_path = search_cmd(buff[0], path);
 		if (full_path)
 			status = execute_with_path(buff, full_path);
 		else
@@ -185,7 +184,6 @@ int create_process(char *shell, char **buff, int count)
 				status = 127;
 			}
 	}
-	free(path_env);
 	return (status);
 }
 
@@ -208,7 +206,8 @@ int execute_with_path(char **buff, char *full_path)
 	{
 		execve(full_path, buff, environ);
 		perror("Error in execve");
-		free_all(buff, full_path);
+		free_all(buff);
+		free(full_path);
 		exit(127);
 	}
 	waitpid(pid, &status, 0);

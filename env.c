@@ -10,19 +10,11 @@
 char *_getenv(char *str)
 {
 	int i;
-	char **parsed = NULL, *value = NULL;
 
 	for (i = 0; environ[i]; i++)
 	{
-		if ((strncmp(str, environ[i], strlen(str))) == 0)
-		{
-			parsed = parser(environ[i], "=");
-			value = strdup(parsed[1]);
-			for (i = 0; parsed[i]; i++)
-				free(parsed[i]);
-			free(parsed);
-			return (value);
-		}
+		if (strncmp(str, environ[i], strlen(str)) == 0)
+			return (environ[i] + strlen(str) + 1);
 	}
 	return (NULL);
 }
