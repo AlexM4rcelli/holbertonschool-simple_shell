@@ -15,7 +15,7 @@ extern char **environ;
 char *print_prompt(int status);
 char **parser(char *str, char *separator);
 char *_getenv(char *str);
-char *search_cmd(char *cmd, char *full_path);
+char *search_cmd(char *cmd, char *path);
 int create_process(char *shell, char **buff, int count, char *path);
 void print_env(void);
 void free_all(char **array);

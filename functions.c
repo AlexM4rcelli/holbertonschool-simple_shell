@@ -89,31 +89,31 @@ char **parser(char *str, char *separator)
  * Return: The full path to the command if found, otherwise NULL.
 */
 
-char *search_cmd(char *cmd, char *full_path)
+char *search_cmd(char *cmd, char *path)
 {
-	char *path = NULL;
+	char *full_path = NULL;
 	char **directories = NULL;
 	int i;
 
-	if (!full_path || strlen(full_path) == 0)
+	if (!path || strlen(path) == 0)
 		return (NULL);
 	if (access(cmd, F_OK) == 0)
 		return (strdup(cmd));
-	directories = parser(full_path, ":");
+	directories = parser(path, ":");
 	if (!directories)
 		return (NULL);
 	for (i = 0; directories[i]; i++)
 	{
-		path = calloc(strlen(directories[i]) + strlen(cmd) + 2, sizeof(char));
+		full_path = calloc(strlen(directories[i]) + strlen(cmd) + 2, sizeof(char));
 		if (path)
 		{
-			strcat(path, directories[i]), strcat(path, "/"), strcat(path, cmd);
-			if (access(path, F_OK) == 0)
+			strcat(full_path, directories[i]), strcat(full_path, "/"), strcat(full_path, cmd);
+			if (access(full_path, F_OK) == 0)
 			{
 				free_all(directories);
-				return (path);
+				return (full_path);
 			}
-			free(path);
+			free(full_path);
 		}
 		else
 		{
@@ -141,7 +141,7 @@ int create_process(char *shell, char **buff, int count, char *path)
 	pid_t pid;
 	int status = 0;
 
-	if (!full_path || !path || strlen(path) == 0)
+	if (!full_path || !path)
 	{
 		if (access(buff[0], F_OK) == 0)
 			full_path = strdup(buff[0]);
@@ -156,7 +156,6 @@ int create_process(char *shell, char **buff, int count, char *path)
 		perror("Can't fork");
 	else if (pid == 0)
 	{
-		printf("%s\n", full_path);
 		execve(full_path, buff, environ);
 		perror("Error in execve");
 		free_all(buff);
