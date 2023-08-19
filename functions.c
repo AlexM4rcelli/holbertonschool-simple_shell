@@ -158,6 +158,7 @@ int create_process(char *shell, char **buff, int count, char *path)
 		fprintf(stderr, "%s: %d: %s: not found\n", shell, count, buff[0]);
 		return (127);
 	}
+	stat(path, &path_stat);
 	if (access(buff[0], F_OK) == 0 && (path_stat.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)))
 	{
 		pid = fork();
