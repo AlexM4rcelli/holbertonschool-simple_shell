@@ -153,6 +153,11 @@ int create_process(char *shell, char **buff, int count, char *path)
 			return (127);
 		}
 	}
+	if (!full_path)
+	{
+		fprintf(stderr, "%s: %d: %s: not found\n", shell, count, buff[0]);
+		return (127);
+	}
 	pid = fork();
 	if (pid == -1)
 		perror("Can't fork");
@@ -165,13 +170,10 @@ int create_process(char *shell, char **buff, int count, char *path)
 		exit(127);
 	}
 	waitpid(pid, &status, 0);
-	if (WIFEXITED(status))
+	if (WIFEXITED(status) && ((WEXITSTATUS(status)) != 0))
 	{
-		if (WEXITSTATUS(status) != 0)
-		{
-			free(full_path);
-			return (WEXITSTATUS(status));
-		}
+		free(full_path);
+		return (WEXITSTATUS(status));
 	}
 	free(full_path);
 	return (status);
