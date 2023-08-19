@@ -3,7 +3,6 @@
 /**
  * free_all - frees a array of arrays
  * @array: array to free
- * @str: string to free
  */
 
 void free_all(char **array)

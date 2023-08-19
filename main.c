@@ -79,7 +79,7 @@ int my_env(void)
 
 /**
  * my_exit - exit fo the current shell
- *
+ * @status: value of exit
  * Return: false
  */
 
