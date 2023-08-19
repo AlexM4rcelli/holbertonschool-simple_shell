@@ -21,16 +21,12 @@ int main(int argc, char *argv[])
 	char **tokens = NULL;
 	int count = 0, status = 0;
 
-
 	while (status >= 0)
 	{
 		count++;
 		buffer = print_prompt(status);
-
-
 		if (!buffer)
 			break;
-
 		if (strspn(buffer, " \t\n\r") == strlen(buffer))
 		{
 			free(buffer);
@@ -55,7 +51,6 @@ int main(int argc, char *argv[])
 		}
 		free(buffer);
 	}
-
 	(void)argc;
 	free(path);
 	return (status);

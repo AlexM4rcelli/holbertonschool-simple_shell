@@ -19,9 +19,7 @@
 		if (isatty(STDIN_FILENO) == 1)
 			write(STDOUT_FILENO, "$ ", 2);
 
-
 		prompt = getline(&buffer, &buffsize, stdin);
-
 
 		if (prompt == -1)
 		{
@@ -110,10 +108,11 @@
 
 		if (!full_path || strlen(full_path) == 0)
 			return (NULL);
+		if (access(cmd, F_OK) == 0)
+			return (strdup(cmd));
 		directories = parser(full_path, ":");
 		if (!directories)
 			return (NULL);
-
 		for (i = 0; directories[i]; i++)
 		{
 			path = calloc(strlen(directories[i]) + strlen(cmd) + 2, sizeof(char));
@@ -148,59 +147,16 @@
 
 	int create_process(char *shell, char **buff, int count, char *path)
 	{
-		char *full_path = NULL;
-		struct stat path_stat;
+		char *full_path = search_cmd(buff[0], path);
 		pid_t pid;
 		int status = 0;
 
-		if (!path || strlen(path) == 0)
+		if (!full_path || !path || strlen(path) == 0)
 		{
 			fprintf(stderr, "%s: %d: %s: not found\n", shell, count, buff[0]);
 			return (127);
 		}
-		stat(path, &path_stat);
-		if (access(buff[0], F_OK) == 0 && (path_stat.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)))
-		{
-			pid = fork();
-			if (pid == -1)
-				perror("Can't fork");
-			else if (pid == 0)
-			{
-				execve(buff[0], buff, environ);
-				perror("Error in execve");
-				free_all(buff);
-				free(full_path);
-				exit(127);
-			}
-			waitpid(pid, &status, 0);
-		}
-		else
-		{
-			full_path = search_cmd(buff[0], path);
-			if (full_path)
-				status = execute_with_path(buff, full_path);
-			else
-				{
-					fprintf(stderr, "%s: %s: %d: not found\n", shell, buff[0], count);
-					status = 127;
-				}
-		}
-		return (status);
-	}
-
-	/**
-	* execute_with_path - Execute a command using the full path.
-	* @buff: An array of strings containing the command and its arguments.
-	* @full_path: The full path to the command.
-	*
-	* Return: status
-	*/
-	int execute_with_path(char **buff, char *full_path)
-	{
-		int status = 0;
-		pid_t pid = fork();
-
-
+		pid = fork();
 		if (pid == -1)
 			perror("Can't fork");
 		else if (pid == 0)
