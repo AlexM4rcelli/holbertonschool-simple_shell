@@ -105,9 +105,11 @@ char *search_cmd(char *cmd, char *path)
 	for (i = 0; directories[i]; i++)
 	{
 		full_path = calloc(strlen(directories[i]) + strlen(cmd) + 2, sizeof(char));
-		if (path)
+		if (full_path)
 		{
-			strcat(full_path, directories[i]), strcat(full_path, "/"), strcat(full_path, cmd);
+			strcat(full_path, directories[i]);
+			strcat(full_path, "/");
+			strcat(full_path, cmd);
 			if (access(full_path, F_OK) == 0)
 			{
 				free_all(directories);
@@ -141,7 +143,7 @@ int create_process(char *shell, char **buff, int count, char *path)
 	pid_t pid;
 	int status = 0;
 
-	if (!full_path || !path)
+	if (!full_path && (!path || strlen(path)) == 0)
 	{
 		if (access(buff[0], F_OK) == 0)
 			full_path = strdup(buff[0]);
@@ -150,6 +152,11 @@ int create_process(char *shell, char **buff, int count, char *path)
 			fprintf(stderr, "%s: %d: %s: not found\n", shell, count, buff[0]);
 			return (127);
 		}
+	}
+	if (!full_path)
+	{
+		fprintf(stderr, "%s: %d: %s: not found\n", shell, count, buff[0]);
+		return (127);
 	}
 	pid = fork();
 	if (pid == -1)
