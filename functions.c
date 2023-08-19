@@ -141,18 +141,23 @@ int create_process(char *shell, char **buff, int count, char *path)
 	pid_t pid;
 	int status = 0;
 
-	if (!full_path || !path || strlen(path) == 0)
+	if (!full_path && (!path || strlen(path)) == 0)
 	{
-		fprintf(stderr, "%s: %d: %s: not found\n", shell, count, buff[0]);
-		return (127);
+		if (access(buff[0], F_OK) == 0)
+			full_path = strdup(buff[0]);
+		else
+		{
+			fprintf(stderr, "%s: %d: %s: not found\n", shell, count, buff[0]);
+			return (127);
+		}
 	}
 	pid = fork();
 	if (pid == -1)
 		perror("Can't fork");
 	else if (pid == 0)
 	{
+		printf("%s\n", full_path);
 		execve(full_path, buff, environ);
-		execve(buff[0], buff, environ);
 		perror("Error in execve");
 		free_all(buff);
 		free(full_path);
