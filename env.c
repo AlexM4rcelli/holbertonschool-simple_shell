@@ -9,12 +9,17 @@
 
 char *_getenv(char *str)
 {
-	int i;
+    int i;
+	size_t str_len = strlen(str);
 
-	for (i = 0; environ[i]; i++)
-	{
-		if (strncmp(str, environ[i], strlen(str)) == 0)
-			return (environ[i] + strlen(str) + 1);
-	}
-	return (NULL);
+	if (!str || !environ)
+		return NULL;
+
+    for (i = 0; environ[i]; i++)
+    {
+        if (strncmp(str, environ[i], str_len) == 0 && environ[i][str_len] == '=')
+            return (environ[i] + str_len + 1);
+    }
+
+    return (NULL);
 }
