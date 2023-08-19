@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 {
 	char *buffer = NULL, *path = NULL;
 	char **tokens = NULL;
-	int i, count = 0, status = 0;
+	int count = 0, status = 0;
 
 
 	while (status >= 0)
@@ -50,9 +50,7 @@ int main(int argc, char *argv[])
 			{
 				path = _getenv("PATH");
 				status = create_process(argv[0], tokens, count, path);
-				for (i = 0; tokens[i]; i++)
-					free(tokens[i]);
-				free(tokens);
+				free_all(tokens);
 			}
 		}
 		free(buffer);
