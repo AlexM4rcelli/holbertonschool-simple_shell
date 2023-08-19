@@ -84,7 +84,7 @@ char **parser(char *str, char *separator)
 /**
  * search_cmd - Search for a command in the directories specified by PATH.
  * @cmd: The command to search for.
- * @full_path: the actual PATH variable.
+ * @path: the actual PATH variable.
  *
  * Return: The full path to the command if found, otherwise NULL.
 */
@@ -143,7 +143,7 @@ int create_process(char *shell, char **buff, int count, char *path)
 	pid_t pid;
 	int status = 0;
 
-	if (!full_path && (!path || strlen(path)) == 0)
+	if (!full_path && (!path || strlen(path) == 0))
 	{
 		if (access(buff[0], F_OK) == 0)
 			full_path = strdup(buff[0]);
@@ -152,11 +152,6 @@ int create_process(char *shell, char **buff, int count, char *path)
 			fprintf(stderr, "%s: %d: %s: not found\n", shell, count, buff[0]);
 			return (127);
 		}
-	}
-	if (!full_path)
-	{
-		fprintf(stderr, "%s: %d: %s: not found\n", shell, count, buff[0]);
-		return (127);
 	}
 	pid = fork();
 	if (pid == -1)
@@ -170,6 +165,14 @@ int create_process(char *shell, char **buff, int count, char *path)
 		exit(127);
 	}
 	waitpid(pid, &status, 0);
+	if (WIFEXITED(status))
+	{
+		if (WEXITSTATUS(status) != 0)
+		{
+			free(full_path);
+			return (WEXITSTATUS(status));
+		}
+	}
 	free(full_path);
 	return (status);
 }
