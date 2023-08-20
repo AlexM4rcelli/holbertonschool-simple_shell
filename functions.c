@@ -98,10 +98,7 @@ char *search_cmd(char *cmd, char *path)
 	if (!path || strlen(path) == 0)
 		return (NULL);
 	if (access(cmd, F_OK) == 0)
-	{
-		if (is_In(cmd) != 0)
-			return (strdup(cmd));
-	}
+		return (strdup(cmd));
 	directories = parser(path, ":");
 	if (!directories)
 		return (NULL);
@@ -146,9 +143,9 @@ int create_process(char *shell, char **buff, int count, char *path)
 	pid_t pid;
 	int status = 0;
 
-	if (!full_path && (!path || strlen(path) == 0))
+	if (!full_path || !path || strlen(path) == 0)
 	{
-		if (is_In(buff[0]) != 0)
+		if (is_In(buff[0]) == 1)
 			full_path = strdup(buff[0]);
 		else
 		{
