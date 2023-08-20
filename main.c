@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
 	{
 		count++;
 		buffer = print_prompt(status);
+		path = _getenv("PATH");
 		if (!buffer)
 			break;
 		if (strspn(buffer, " \t\n\r") == strlen(buffer))
@@ -44,7 +45,6 @@ int main(int argc, char *argv[])
 			tokens = parser(buffer, " \t\n\r");
 			if (tokens)
 			{
-				path = _getenv("PATH");
 				status = create_process(argv[0], tokens, count, path);
 				free_all(tokens);
 			}

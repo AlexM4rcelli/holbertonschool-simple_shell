@@ -98,7 +98,10 @@ char *search_cmd(char *cmd, char *path)
 	if (!path || strlen(path) == 0)
 		return (NULL);
 	if (access(cmd, F_OK) == 0)
-		return (strdup(cmd));
+	{
+		if (is_In(cmd) != 0)
+			return (strdup(cmd));
+	}
 	directories = parser(path, ":");
 	if (!directories)
 		return (NULL);
