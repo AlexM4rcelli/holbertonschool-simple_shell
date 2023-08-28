@@ -16,7 +16,7 @@ char *print_prompt(int status)
 	if (isatty(STDIN_FILENO) == 1)
 		write(STDOUT_FILENO, "$ ", 2);
 
-	prompt = getline(&buffer, &buffsize, stdin);
+	prompt = my_getline(&buffer, &buffsize, stdin);
 
 	if (prompt == -1)
 	{
@@ -43,7 +43,6 @@ char **parser(char *str, char *separator)
 {
 	char **tokens = NULL, *token = NULL, *aux = NULL;
 	int i, count = 0, j;
-
 
 	if (!str)
 		return (NULL);

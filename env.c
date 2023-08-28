@@ -23,3 +23,4 @@ char *_getenv(char *str)
 
 	return (NULL);
 }
+

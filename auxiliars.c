@@ -9,12 +9,9 @@ void free_all(char **array)
 {
 	int i;
 
-	if (array)
-	{
-		for (i = 0; array[i]; i++)
-			free(array[i]);
-		free(array);
-	}
+	for (i = 0; array[i]; i++)
+		free(array[i]);
+	free(array);
 }
 
 /**
@@ -50,4 +47,47 @@ int is_In(char *file)
 	free(absolutePath);
 	free(curr);
 	return (1);
+}
+
+/**
+ * my_getline - read a line of text from a specified input stream
+ *
+ * @buffer: pointer to string that will store the line
+ * @buffer_size: pointer to a variable that holds the size of the buffer
+ * @stram: the input stream from which read the line
+ *
+ * Return: the number of characters readed or -1 on error or EOF is reached
+ */
+ssize_t my_getline(char **buffer, size_t *buffer_size, FILE *stream)
+{
+	size_t line_len = 0, capacity = *buffer_size;
+	int character;
+
+	if (*buffer == NULL)
+	{
+		if (*buffer_size == 0)
+			capacity = 128;
+		*buffer = (char *) malloc(capacity + 1);
+		if (*buffer == NULL)
+			return (-1);
+	}
+	while ((character = fgetc(stream)) != EOF)
+	{
+		if (line_len + 1 >= capacity)
+		{
+			capacity = capacity * 2;
+			*buffer = (char*)realloc(*buffer, capacity + 1);
+			if (*buffer == NULL)
+				return (-1);
+		}
+		(*buffer)[line_len++] = (char)character;
+		if (character == '\n')
+			break;
+	}
+	if (line_len == 0 && character == EOF)
+		return (-1);
+	(*buffer)[line_len] = '\0';
+	*buffer_size = strlen(*buffer);
+
+	return (line_len);
 }
